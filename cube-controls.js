@@ -102,6 +102,59 @@
       }
     }
 
+    // --- Move Deduction Logic (In-Memory Simulation) ---
+
+    const POSSIBLE_MOVES = [
+        "U", "U'", "U2", "D", "D'", "D2",
+        "R", "R'", "R2", "L", "L'", "L2",
+        "F", "F'", "F2", "B", "B'", "B2",
+        "M", "M'", "M2", "S", "S'", "S2",
+        "E", "E'", "E2"
+    ];
+
+    /**
+     * Compares a before and after cube state to deduce the move that was performed
+     * using a direct in-memory simulation strategy.
+     * @param {Array<Array<number>>} beforeState The cube state before the move.
+     * @param {Array<Array<number>>} afterState The cube state after the move.
+     * @returns {string|null} The deduced move string (e.g., "U"), or null if no move is matched.
+     */
+    function deduceMove(beforeState, afterState) {
+        if (!beforeState || !afterState) {
+            return null;
+        }
+
+        const afterString = JSON.stringify(afterState);
+        if (JSON.stringify(beforeState) === afterString) {
+            return null; // No change detected
+        }
+
+        // Ensure the required functions from AnimCube3.js are available
+        if (typeof getMove !== 'function' || typeof doMove !== 'function') {
+            console.error("deduceMove requires 'getMove' and 'doMove' functions from AnimCube3.js");
+            return null;
+        }
+
+        for (const move of POSSIBLE_MOVES) {
+            // 1. Create a deep copy of the state to simulate on
+            const simulatedState = JSON.parse(JSON.stringify(beforeState));
+            
+            // 2. Convert the move string (e.g., "U") into a move sequence array
+            const moveSequence = getMove(move, false)[0];
+
+            // 3. Apply the move synchronously to our in-memory state array
+            doMove(simulatedState, moveSequence, 0, moveSequence.length, false);
+
+            // 4. Compare the result with the actual afterState
+            if (JSON.stringify(simulatedState) === afterString) {
+                return move; // Found it!
+            }
+        }
+
+        console.warn("Could not deduce a single move from state change.", { beforeState, afterState });
+        return null; // No single standard move matched
+    }
+
     // --- WebSocket Integration (Placeholder) ---
     // The WebSocket logic will now be handled in websocket-client.js
     // We will make performMoves and Cube IDs available globally for websocket-client.js
@@ -116,28 +169,54 @@
     document.getElementById('scramble-btn').addEventListener('click', scrambleCubes);
     document.getElementById('reset-btn').addEventListener('click', resetCubes);
 
+    const myCubeContainer = document.getElementById(MY_CUBE_ID);
+    let isDragging = false;
+    let beforeState = null; // Declare beforeState here
+
+    myCubeContainer.addEventListener('mousedown', function(event) {
+        event.preventDefault();
+        isDragging = true;
+        // Store the cube's state *before* the drag
+        if (typeof acjs_cube !== 'undefined' && acjs_cube[MY_CUBE_ID]) {
+            beforeState = JSON.parse(JSON.stringify(acjs_cube[MY_CUBE_ID]));
+            console.log('Mouse Down on My Cube. Stored beforeState.');
+        } else {
+            console.error('acjs_cube or acjs_cube[MY_CUBE_ID] is not defined.');
+        }
+    });
+
+    myCubeContainer.addEventListener('mouseup', function(event) {
+        if (isDragging) {
+            isDragging = false;
+
+            // Use a short timeout to allow AnimCube3.js to finalize the animation and update its internal state
+            setTimeout(() => {
+                if (typeof acjs_cube !== 'undefined' && acjs_cube[MY_CUBE_ID]) {
+                    const afterState = JSON.parse(JSON.stringify(acjs_cube[MY_CUBE_ID]));
+                    
+                    // --- DEBUGGING: Log states to understand internal representation ---
+                    console.log("--- Cube State Debug (after 100ms delay) ---");
+                    console.log("Before State:", JSON.stringify(beforeState));
+                    console.log("After State: ", JSON.stringify(afterState));
+                    console.log("-------------------------------------------");
+
+
+                    const deducedMove = deduceMove(beforeState, afterState);
+                    if (deducedMove) {
+                        console.log('Deduced Move:', deducedMove);
+                        // Send the move to the opponent via WebSocket
+                        if (window.CubeSim && window.CubeSim.sendMoveToOpponent) {
+                            window.CubeSim.sendMoveToOpponent(deducedMove);
+                        }
+                    } else {
+                        console.warn('No single move deduced.');
+                    }
+                } else {
+                    console.error('acjs_cube or acjs_cube[MY_CUBE_ID] is not defined at mouseup.');
+                }
+            }, 100); // 100ms delay
+        }
+    });
+
     // Simple keyboard listener to demonstrate sending moves
     // A more robust solution would be needed to capture mouse moves
-    document.addEventListener('keydown', function (event) {
-      const moveMap = {
-        'U': "U", 'u': "U'",
-        'D': "D", 'd': "D'",
-        'R': "R", 'r': "R'",
-        'L': "L", 'l': "L'",
-        'F': "F", 'f': "F'",
-        'B': "B", 'b': "B'"
-      };
-      const move = moveMap[event.key];
-      if (move) {
-        event.preventDefault(); // Prevent browser shortcuts
-
-        // Apply the move to my cube
-        performMoves(MY_CUBE_ID, move);
-
-        // Send the move to the opponent via WebSocket
-        if (window.CubeSim && window.CubeSim.sendMoveToOpponent) {
-            window.CubeSim.sendMoveToOpponent(move);
-        }
-        console.log('Sent move:', move);
-      }
-    });

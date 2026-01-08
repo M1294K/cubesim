@@ -1502,5 +1502,10 @@ function AnimCube3(params) {
             return !1
         }
     }
+
+    // Expose internal functions for use in other scripts
+    window.getMove = getMove;
+    window.doMove = doMove;
+
     init0()
 }
