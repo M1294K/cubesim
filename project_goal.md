@@ -1,6 +1,7 @@
 # CubeSim Project Goal
 
 This document outlines the final objectives for the Interactive Cube Simulator project.
+Do not modify 'AnimCube3.js' without accept.
 
 ## Core Concept
 

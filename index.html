@@ -34,22 +34,43 @@
 
 <body>
 
-  <div class="main-container">
-
-    <div class="player-container">
-      <h1>Opponent</h1>
-      <div id="opponent_cube_container" class="cube-area"></div>
+  <div class="app-container">
+    <div class="status-container">
+      <h2>Game Status</h2>
+      <p id="status-message">Welcome! Create or join a room to begin.</p>
+      <div id="room-info"></div>
     </div>
 
-    <div class="player-container">
-      <h1>My Cube</h1>
-      <div id="my_cube_container" class="cube-area"></div>
-      <div class="controls">
-        <button id="scramble-btn">Scramble</button>
-        <button id="reset-btn">Reset</button>
+    <div class="main-container">
+      <div class="player-container">
+        <h1>Opponent</h1>
+        <div id="opponent_cube_container" class="cube-area"></div>
+        <p id="opponent-status" class="player-status">Waiting for player...</p>
+      </div>
+
+      <div class="player-container">
+        <h1>My Cube</h1>
+        <div id="my_cube_container" class="cube-area"></div>
+        <p id="my-status" class="player-status">Not Ready</p>
       </div>
     </div>
 
+    <div class="controls-container">
+      <div class="controls-section" id="room-controls">
+        <h3>Room Controls</h3>
+        <button id="create-room-btn">Create Room</button>
+        <div class="join-group">
+          <input type="text" id="room-id-input" placeholder="Enter Room ID">
+          <button id="join-room-btn">Join Room</button>
+        </div>
+      </div>
+      <div class="controls-section" id="game-controls">
+        <h3>Game Controls</h3>
+        <button id="ready-btn" disabled>I'm Ready</button>
+        <button id="start-game-btn" style="display: none;">Start Game</button>
+        <button id="reset-btn">Reset Cubes</button>
+      </div>
+    </div>
   </div>
 
   <script src="cube-controls.js"></script>
