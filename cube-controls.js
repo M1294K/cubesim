@@ -146,15 +146,16 @@ function deduceMove(beforeState, afterState) {
  */
 function isCubeSolved(cubeId) {
     const currentState = acjs_cube[cubeId];
-    const solvedState = acjs_initialCube[cubeId];
+    if (!currentState) return false;
 
-    if (!currentState || !solvedState) {
-        console.error('Cube state for comparison is not available.');
-        return false;
-    }
-
-    return JSON.stringify(currentState) === JSON.stringify(solvedState);
+    // 각 행의 모든 요소가 동일한지 검사
+    return currentState.every(row =>
+        Array.isArray(row) &&
+        row.length > 0 &&
+        row.every(v => v === row[0])
+    );
 }
+
 
 // --- WebSocket Integration (Placeholder) ---
 // The WebSocket logic will now be handled in websocket-client.js
@@ -197,6 +198,7 @@ myCubeContainer.addEventListener('mouseup', function (event) {
                 const deducedMove = deduceMove(beforeState, afterState);
                 if (deducedMove) {
                     console.log('Deduced Move:', deducedMove);
+                    console.log(acjs_cube[MY_CUBE_ID], acjs_initialCube[MY_CUBE_ID] )
                     // Send the move to the opponent via WebSocket
                     if (window.CubeSim && window.CubeSim.sendMoveToOpponent) {
                         window.CubeSim.sendMoveToOpponent(deducedMove);
