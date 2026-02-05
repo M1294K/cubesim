@@ -198,7 +198,7 @@ myCubeContainer.addEventListener('mouseup', function (event) {
                 const deducedMove = deduceMove(beforeState, afterState);
                 if (deducedMove) {
                     console.log('Deduced Move:', deducedMove);
-                    console.log(acjs_cube[MY_CUBE_ID], acjs_initialCube[MY_CUBE_ID] )
+                    console.log(acjs_cube[MY_CUBE_ID], acjs_initialCube[MY_CUBE_ID])
                     // Send the move to the opponent via WebSocket
                     if (window.CubeSim && window.CubeSim.sendMoveToOpponent) {
                         window.CubeSim.sendMoveToOpponent(deducedMove);

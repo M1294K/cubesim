@@ -100,7 +100,7 @@ function handlePlayerReady(ws) {
 
     room.readyStates.set(ws, true);
     console.log(`Client ${ws.id} in room ${ws.roomId} is ready.`);
-    
+
     broadcastToRoom(ws.roomId, 'playerReadyState', { playerId: ws.id, isReady: true });
 
     // Check if all players are ready
@@ -152,12 +152,20 @@ function handleMove(ws, move) {
 
 function handleGameWon(ws) {
     const room = rooms[ws.roomId];
-    if (!room) return;
+    if (!room) {
+        console.error(`handleGameWon: Room not found for player ${ws.id} (RoomID: ${ws.roomId})`);
+        return;
+    }
 
-    console.log(`Player ${ws.id} won in room ${ws.roomId}.`);
+    console.log(`handleGameWon: Player ${ws.id} WON in room ${ws.roomId}. Broadcasting gameOver...`);
+
+    // Broadcast with verification
     broadcastToRoom(ws.roomId, 'gameOver', { winnerId: ws.id });
 
-    // Optional: Reset ready states for a potential rematch, or just let clients disconnect/reset
+    // Verify player count
+    console.log(`handleGameWon: Broadcast initiated to ${room.players.length} players.`);
+
+    // Optional: Reset ready states for a potential rematch
     room.readyStates.forEach((value, key) => {
         room.readyStates.set(key, false);
     });
@@ -189,16 +197,29 @@ function handleDisconnect(ws) {
 // --- Helper Functions ---
 
 function sendMessage(ws, type, payload) {
-    ws.send(JSON.stringify({ type, ...payload }));
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type, ...payload }));
+    }
 }
 
 function broadcastToRoom(roomId, type, payload) {
     const room = rooms[roomId];
-    if (!room) return;
+    if (!room) {
+        console.warn(`broadcastToRoom: Room ${roomId} not found.`);
+        return;
+    }
+
+    console.log(`Broadcast [${type}] to Room ${roomId} (Players: ${room.players.length})`);
 
     room.players.forEach(player => {
-        if (player.readyState === WebSocket.OPEN) {
-            sendMessage(player, type, payload);
+        try {
+            if (player.readyState === WebSocket.OPEN) {
+                sendMessage(player, type, payload);
+            } else {
+                console.warn(`broadcastToRoom: Player ${player.id} is not OPEN (State: ${player.readyState})`);
+            }
+        } catch (e) {
+            console.error(`broadcastToRoom: Failed to send to player`, e);
         }
     });
 }
