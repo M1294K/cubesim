@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>Interactive Cube Simulator</title>
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
   <!-- Prepare acjs arrays to capture cube internals -->
   <script>
     var acjs_move = [];
@@ -63,6 +63,13 @@
           <input type="text" id="room-id-input" placeholder="Enter Room ID">
           <button id="join-room-btn">Join Room</button>
         </div>
+      </div>
+      <div class="room-list-panel">
+        <div class="room-list-header">
+          <h4>Open Rooms</h4>
+          <button id="refresh-room-list-btn" type="button">Refresh</button>
+        </div>
+        <div id="room-list" class="room-list"></div>
       </div>
       <div class="controls-section" id="game-controls">
         <h3>Game Controls</h3>

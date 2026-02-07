@@ -1,170 +1,177 @@
 body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      color: #333;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  color: #333;
+  padding: 20px;
+  box-sizing: border-box;
+}
 
-    .app-container {
-      width: 100%;
-      max-width: 1200px;
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
-      text-align: center;
-    }
+.app-container {
+  width: 100%;
+  max-width: 1200px;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+  text-align: center;
+}
 
-    .status-container {
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #e0e0e0;
-    }
+.status-container {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
 
-    .status-container h2 {
-        margin-top: 0;
-    }
+.status-container h2 {
+  margin-top: 0;
+}
 
-    #status-message {
-        font-size: 1.1em;
-        color: #555;
-    }
+#status-message {
+  font-size: 1.1em;
+  color: #555;
+}
 
-    #room-info {
-        font-weight: bold;
-        color: #007aff;
-        margin-top: 10px;
-    }
+#room-info {
+  font-weight: bold;
+  color: #007aff;
+  margin-top: 10px;
+}
 
-    .main-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 50px;
-      width: 100%;
-      margin-bottom: 30px;
-    }
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 50px;
+  width: 100%;
+  margin-bottom: 30px;
+}
 
-    .player-container {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex-basis: 50%;
-    }
-    
-    .player-status {
-        font-size: 1.1em;
-        font-weight: 600;
-        padding: 8px 16px;
-        border-radius: 15px;
-        min-width: 120px;
-    }
+.player-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-basis: 50%;
+}
 
-    #my-status.ready, #opponent-status.ready {
-        color: #34c759;
-        background-color: rgba(52, 199, 89, 0.1);
-    }
-    #my-status.not-ready, #opponent-status.not-ready {
-        color: #ff3b30;
-        background-color: rgba(255, 59, 48, 0.1);
-    }
+.player-status {
+  font-size: 1.1em;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 15px;
+  min-width: 120px;
+}
+
+#my-status.ready,
+#opponent-status.ready {
+  color: #34c759;
+  background-color: rgba(52, 199, 89, 0.1);
+}
+
+#my-status.not-ready,
+#opponent-status.not-ready {
+  color: #ff3b30;
+  background-color: rgba(255, 59, 48, 0.1);
+}
 
 
-    h1 {
-      margin-top: 0;
-      font-size: 24px;
-      font-weight: 600;
-      color: #1c1c1e;
-    }
+h1 {
+  margin-top: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1c1c1e;
+}
 
-    .cube-area {
-      width: 400px;
-      height: 400px;
-      margin: 10px 0;
-      border-radius: 8px;
-      overflow: hidden;
-      background-color: #e0e0e0;
-    }
+.cube-area {
+  width: 400px;
+  height: 400px;
+  margin: 10px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #e0e0e0;
+}
 
-    .controls-container {
-      display: flex;
-      justify-content: space-around;
-      gap: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #e0e0e0;
-    }
+.controls-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
 
-    .controls-section {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        align-items: center;
-    }
+.controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
 
-    .join-group {
-        display: flex;
-        gap: 8px;
-    }
+.join-group {
+  display: flex;
+  gap: 8px;
+}
 
-    button {
-      background-color: #007aff;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      font-weight: 500;
-      margin: 4px 2px;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: background-color 0.2s ease-in-out, transform 0.1s ease;
-    }
+button {
+  background-color: #007aff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+}
 
-    button:hover:not(:disabled) {
-      background-color: #005ecb;
-    }
+button:hover:not(:disabled) {
+  background-color: #005ecb;
+}
 
-    button:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-    
-    button:disabled {
-        background-color: #c7c7cc;
-        cursor: not-allowed;
-    }
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
 
-    #start-game-btn {
-        background-color: #34c759; /* Green */
-    }
-    #start-game-btn:hover:not(:disabled) {
-        background-color: #2ca349;
-    }
+button:disabled {
+  background-color: #c7c7cc;
+  cursor: not-allowed;
+}
 
-    #reset-btn {
-      background-color: #ff9500; /* Orange */
-    }
+#start-game-btn {
+  background-color: #34c759;
+  /* Green */
+}
 
-    #reset-btn:hover {
-      background-color: #d87d00;
-    }
+#start-game-btn:hover:not(:disabled) {
+  background-color: #2ca349;
+}
 
-    input[type="text"] {
-        padding: 12px;
-        font-size: 16px;
-        border: 1px solid #c7c7cc;
-        border-radius: 8px;
-    }
-    input[type="text"]:focus {
-        outline: none;
-        border-color: #007aff;
-        box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
-    }
+#reset-btn {
+  background-color: #ff9500;
+  /* Orange */
+}
+
+#reset-btn:hover {
+  background-color: #d87d00;
+}
+
+input[type="text"] {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #c7c7cc;
+  border-radius: 8px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #007aff;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+}

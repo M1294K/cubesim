@@ -46,6 +46,9 @@ wss.on('connection', ws => {
             case 'gameWon':
                 handleGameWon(ws);
                 break;
+            case 'getRoomList':
+                sendRoomList(ws);
+                break;
             default:
                 console.warn(`Unknown message type: ${data.type}`);
         }
@@ -62,16 +65,23 @@ wss.on('connection', ws => {
 });
 
 function handleCreateRoom(ws) {
-    const roomId = uuidv4().slice(0, 6); // Create a short, unique room ID
+    const roomId = uuidv4().slice(0, 6);
+
     rooms[roomId] = {
         players: [ws],
-        readyStates: new Map([[ws, false]])
+        readyStates: new Map([[ws, false]]),
+        status: 'OPEN',
+        createdAt: Date.now()
     };
-    ws.roomId = roomId; // Assign roomId to the ws connection for later reference
+
+    ws.roomId = roomId;
 
     sendMessage(ws, 'roomCreated', { roomId });
     console.log(`Room ${roomId} created by Client ${ws.id}`);
+
+    broadcastRoomList();
 }
+
 
 function handleJoinRoom(ws, roomId) {
     const room = rooms[roomId];
@@ -79,6 +89,12 @@ function handleJoinRoom(ws, roomId) {
         sendMessage(ws, 'error', { message: 'Room not found' });
         return;
     }
+
+    if (room.status !== 'OPEN') {
+        sendMessage(ws, 'error', { message: 'Room is not joinable' });
+        return;
+    }
+
     if (room.players.length >= 2) {
         sendMessage(ws, 'error', { message: 'Room is full' });
         return;
@@ -88,11 +104,17 @@ function handleJoinRoom(ws, roomId) {
     room.readyStates.set(ws, false);
     ws.roomId = roomId;
 
+    if (room.players.length === 2) {
+        room.status = 'FULL';
+    }
+
     console.log(`Client ${ws.id} joined room ${roomId}`);
 
-    // Notify both players that they are in the room together
     broadcastToRoom(roomId, 'playerJoined', { roomId, playerCount: room.players.length });
+
+    broadcastRoomList();
 }
+
 
 function handlePlayerReady(ws) {
     const room = rooms[ws.roomId];
@@ -122,7 +144,6 @@ function handleStartGame(ws) {
     const room = rooms[ws.roomId];
     if (!room || room.players.length !== 2) return;
 
-    // Verify all players are ready before starting
     let allReady = true;
     for (const ready of room.readyStates.values()) {
         if (!ready) allReady = false;
@@ -130,12 +151,18 @@ function handleStartGame(ws) {
 
     if (allReady) {
         console.log(`Game starting in room ${ws.roomId}`);
+
+        room.status = 'IN_GAME';
+
         const scrambleSequence = generateScramble();
         broadcastToRoom(ws.roomId, 'gameStarted', { scramble: scrambleSequence });
+
+        broadcastRoomList();
     } else {
         console.warn(`Attempted to start game in room ${ws.roomId} but not all players were ready.`);
     }
 }
+
 
 
 function handleMove(ws, move) {
@@ -176,23 +203,25 @@ function handleDisconnect(ws) {
     const room = rooms[ws.roomId];
     if (!room) return;
 
-    // Remove player from room
     room.players = room.players.filter(player => player !== ws);
     room.readyStates.delete(ws);
 
     if (room.players.length === 0) {
-        // If room is empty, delete it
         console.log(`Room ${ws.roomId} is empty, deleting.`);
         delete rooms[ws.roomId];
     } else {
-        // Notify remaining player
         console.log(`Player disconnected from room ${ws.roomId}, notifying opponent.`);
         broadcastToRoom(ws.roomId, 'opponentDisconnected', {});
-        // Reset ready state for the remaining player
+
         const remainingPlayer = room.players[0];
         room.readyStates.set(remainingPlayer, false);
+
+        room.status = 'OPEN';
     }
+
+    broadcastRoomList();
 }
+
 
 // --- Helper Functions ---
 
@@ -220,6 +249,34 @@ function broadcastToRoom(roomId, type, payload) {
             }
         } catch (e) {
             console.error(`broadcastToRoom: Failed to send to player`, e);
+        }
+    });
+}
+function getOpenRoomList() {
+    // “일반적인 게임 로비”처럼: 1명 대기중인 방만 노출
+    const list = Object.entries(rooms)
+        .map(([roomId, room]) => ({
+            roomId,
+            playerCount: room.players.length,
+            status: room.status,
+            createdAt: room.createdAt
+        }))
+        .filter(r => r.status === 'OPEN' && r.playerCount === 1)
+        // 최신 방이 위로 오게 정렬(원하면)
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+    return list;
+}
+
+function sendRoomList(ws) {
+    sendMessage(ws, 'roomList', { rooms: getOpenRoomList() });
+}
+
+function broadcastRoomList() {
+    const roomsList = getOpenRoomList();
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            sendMessage(client, 'roomList', { rooms: roomsList });
         }
     });
 }

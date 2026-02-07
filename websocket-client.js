@@ -13,6 +13,8 @@ const roomInfo = document.getElementById('room-info');
 const myStatus = document.getElementById('my-status');
 const opponentStatus = document.getElementById('opponent-status');
 
+const roomListDiv = document.getElementById('room-list');
+const refreshRoomListBtn = document.getElementById('refresh-room-list-btn');
 
 // --- State ---
 let myPlayerId = null;
@@ -21,6 +23,8 @@ let myPlayerId = null;
 socket.onopen = function (event) {
     console.log('WebSocket connection opened:', event);
     statusMessage.textContent = 'Connected to server. Create or join a room.';
+
+    sendMessage('getRoomList');
 };
 
 socket.onmessage = function (event) {
@@ -43,7 +47,9 @@ socket.onmessage = function (event) {
             disableRoomControls();
             readyBtn.disabled = false;
             break;
-
+        case 'roomList':
+            renderRoomList(msg.rooms || []);
+            break;
         case 'playerJoined':
             statusMessage.textContent = `Player joined! Get ready!`;
             disableRoomControls(); // Also disable room controls for the player who joins
@@ -153,6 +159,9 @@ startGameBtn.addEventListener('click', () => {
     sendMessage('startGame');
 });
 
+refreshRoomListBtn.addEventListener('click', () => {
+    sendMessage('getRoomList');
+});
 
 // --- Helper Functions ---
 function sendMessage(type, payload = {}) {
@@ -173,6 +182,36 @@ function disableAllControls() {
     disableRoomControls();
     readyBtn.disabled = true;
     startGameBtn.disabled = true;
+}
+function renderRoomList(rooms) {
+    if (!roomListDiv) return;
+
+    roomListDiv.innerHTML = '';
+
+    if (!rooms.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'No open rooms.';
+        roomListDiv.appendChild(empty);
+        return;
+    }
+
+    rooms.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'room-row';
+
+        const info = document.createElement('span');
+        info.textContent = `${r.roomId} (${r.playerCount}/2)`;
+
+        const btn = document.createElement('button');
+        btn.textContent = 'Join';
+        btn.onclick = () => {
+            sendMessage('joinRoom', { roomId: r.roomId });
+        };
+
+        row.appendChild(info);
+        row.appendChild(btn);
+        roomListDiv.appendChild(row);
+    });
 }
 
 function resetUI() {
